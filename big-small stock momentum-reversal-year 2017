@@ -1,0 +1,125 @@
+import numpy as np
+import pandas as pd
+import datetime as dt
+from datetime import timedelta
+import statsmodels.api as sm
+import scipy.stats.mstats as ssm
+from scipy.stats import ttest_1samp
+import sys
+import os
+
+path = "D:\\rebecca\\momentum"
+close = pd.read_csv(path+"\close.csv",sep=',',index_col=0)
+ind = pd.read_csv(path+"\cap.csv",sep=',',index_col=0,encoding='gbk')
+labels = ['pro1','pro10']
+ind = ind.T
+ind1 = ind.copy()
+tag1 = ['pro1', 'pro2', 'pro3', 'pro4', 'pro5','pro6', 'pro7', 'pro8', 'pro9', 'pro10']
+
+
+for col in ind.columns:
+    ind1[col] = pd.qcut((ind[col]).dropna(),10,labels = tag1)
+ind1 = ind1.T
+
+class momentum(object):
+    def __init__(self,close,ind,labels,j,k):
+        self.j = j
+        self.k = k
+        self.close = close
+        self.ind = ind
+        self.labels = labels
+
+    def initialize(self):
+        def timeconvert(x):
+            x.index = x.index.astype('str')
+            x.index = pd.to_datetime(pd.DatetimeIndex(x.index).date)
+        timeconvert(self.close)
+        timeconvert(self.ind)
+        self.monclo = self.close.resample('W').last()
+        self.monclo = self.monclo.dropna(axis=0, how='all')
+        self.monind = self.ind.resample('W').last()
+        self.monind = self.monind.dropna(axis=0, how='all')
+        self.tag = ['pro1', 'pro2', 'pro3', 'pro4', 'pro5']
+
+    def rank(self):
+        self.monclof = self.monclo.iloc[self.j:,:]
+        self.monclol = self.monclo.iloc[:-self.j,:]
+        self.monclof = self.monclof.copy()
+        self.monclol = self.monclol.copy()
+        #self.monclol.reset_index(drop=True)
+        self.monclol.index = self.monclof.index
+        #self.rankret = self.rankret.rank(method = 'first',ascending=True,axis=1)
+
+    def industry(self):
+        self.pool = []
+        self.monindf = self.monind.iloc[self.j:,:]
+        self.monindl = self.monind.iloc[:-self.j,:]
+        self.monindf = self.monindf.copy()
+        self.monindl = self.monindl.copy()
+        self.monindl.index = self.monindf.index
+
+    def moment(self):
+        n_12 = ''.join([str(n) for n in (self.j, self.k)])
+        pa = path + '\\_' + n_12
+        self.evalue = pd.DataFrame(index = self.labels,columns=['p-value','averet'])
+        monclof = self.monclof.copy()
+        print(self.labels)
+        self.monindf = self.monindf.fillna('miss')
+        for lab in self.labels:
+            self.monclof = monclof.copy()
+            self.monclof[self.monindf != lab] = np.nan
+            self.rankret = self.monclof / self.monclol - 1
+            self.rankret = self.rankret.dropna(axis=1, how='all')
+            self.rankret = self.rankret.T
+            self.df = self.rankret.copy()
+            for col in self.rankret.columns:
+                self.df[col] = pd.qcut((self.rankret[col]).dropna(), 5, labels=self.tag)
+            self.lose2 = []
+            self.win2 = []
+            self.lose3 = []
+            self.win3 = []
+            for i in range(0,len(self.df.T)-self.k):
+                df1 = self.df.iloc[:,i]
+                self.lose = df1[ df1 == 'pro1'].index.tolist()
+                self.lose1 = []
+                for label in self.lose:
+                    self.lose1.append(self.monclof.ix[i+self.k,label]/self.monclof.ix[i,label]-1)
+                    for j in range(0,self.k):
+                        self.lose3.append(self.monclof.ix[i+j+1,label]/self.monclof.ix[i+j,label]-1)
+                self.lose1 = pd.Series(self.lose1)
+                self.lose2.append(self.lose1.mean())
+
+                self.win = df1[df1 == 'pro5'].index.tolist()
+                self.win1 = []
+                for label in self.win:
+                    self.win1.append(self.monclof.ix[i + self.k, label] / self.monclof.ix[i, label] - 1)
+                    for j in range(0, self.k):
+                        self.win3.append(self.monclof.ix[i + j + 1,label] / self.monclof.ix[i + j,label] - 1)
+                self.win1 = pd.Series(self.win1)
+                self.win2.append(self.win1.mean())
+            self.deta = pd.Series(self.win2) - pd.Series(self.lose2)
+            self.resul = ttest_1samp(self.deta, 0.0)
+            self.ret = pd.Series(self.win3) - pd.Series(self.lose3)
+            self.evalue.loc[lab,'p-value'] = self.resul.pvalue
+            self.evalue.loc[lab,'averet'] = self.ret.mean()
+            print(lab)
+        self.evalue.to_csv(pa + "Assess1.csv")
+
+
+    def cal_all(self):
+        self.initialize()
+        self.rank()
+        self.industry()
+        self.moment()
+        print("success########################################")
+
+'''n1 = [6,9,12,15,18]
+n2 = [3,6,9,12,15,18]
+for i in range(0,len(n1)):
+    for j in range(0,len(n2)):
+        mom = momentum(close,ind1,labels,n1[i],n2[j])
+        mom.cal_all()'''
+mom = momentum(close,ind1,labels,3,18)
+mom.cal_all()
+
+
