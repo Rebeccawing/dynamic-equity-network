@@ -1,0 +1,467 @@
+//对2007股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2007.xlsx", sheet("2007收益率") firstrow clear
+save 2007.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-ADM{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-ADM1
+//手动删掉不平稳问题序列【此处待优化】
+drop DI
+drop KS
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-ADM{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-ADM1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+drop AE-ADM
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-AD{
+foreach y of varlist `x'-AD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+
+//对2008股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2008.xlsx", sheet("2008收益率") firstrow clear
+save 2008.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AEK{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AEK1
+//经检验数据全部平稳
+
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AEK{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AEK1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop CE-AEK
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-CD{
+foreach y of varlist `x'-CD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+
+
+//对2009股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2009.xlsx", sheet("2009收益率") firstrow clear
+save 2009.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AEP{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AEP1
+//手动删掉不平稳问题序列【此处待优化】
+drop X
+drop HQ
+drop HR
+drop OX
+drop RM
+drop UQ
+drop VW
+drop YR
+drop AAS
+
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AEP{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AEP1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+drop AE-AEP
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-AD{
+foreach y of varlist `x'-AD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+//对2010股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2010.xlsx", sheet("2010收益率") firstrow clear
+save 2010.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AEX{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AEX1
+//经检验数据全部平稳
+
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AEX{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AEX1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AEX
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+
+//对2011股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2011.xlsx", sheet("2011收益率") firstrow clear
+save 2011.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AFY{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AFY1
+//经检验数据全部平稳
+
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AFY{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AFY1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AFY
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+
+//对2012股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2012.xlsx", sheet("2012收益率") firstrow clear
+save 2012.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AHR{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AHR1
+//经检验数据全部平稳
+
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AHR{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AHR1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AHR
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+//对2013股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2013.xlsx", sheet("2013收益率") firstrow clear
+save 2013.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AIU{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AIU1
+//经检验数据全部平稳
+
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AIU
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AIU1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AIU
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+//对2014股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2014.xlsx", sheet("2014收益率") firstrow clear
+save 2014.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AIZ{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AIZ1
+//经检验数据LK列缺失
+drop LK
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AIZ
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AIZ1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AIZ
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+//对2015股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2015.xlsx", sheet("2015收益率") firstrow clear
+save 2015.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AKQ{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AKQ1
+//经检验数据全部平稳
+
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AKQ
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AKQ1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AKQ
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
+
+
+
+
+
+//对2016股票数据做mgarch模型检验
+cd C:\DELL\finetwork\data\
+import excel "C:\DELL\finetwork\data\2016.xlsx", sheet("2016收益率") firstrow clear
+save 2016.dta,replace
+//将数据导成时间序列
+rename A date
+label variable date "date"
+tsset date
+
+//判断数据平稳性
+foreach x of varlist B-AOC{ 
+        dfuller `x'
+		gen `x'1 = `x' if r(p) > 0.05
+		}
+drop B1-AOC1
+//经检验DO列数据全部为0
+drop DO
+
+//判断数据是否具有arch效应，此处滞后阶数经过尝试发现2相对最佳
+foreach x of varlist B-AOC{
+        regress `x'
+		estat archlm,lag(2)
+		gen `x'1 = `x' if trace(r(p)) > 0.15
+		}
+
+drop B1-AOC1
+//此处仍然有很多是不具有波动聚类现象的（这里待定--和老师商量）
+
+drop BE-AOC
+
+//对数据两两之间做dcc mgarch
+foreach x of varlist B-BD{
+foreach y of varlist `x'-BD{
+if `x'!=`y'{
+            capture mgarch dcc (`x' `y'=),arch(1) garch(1) iterate(100)
+            capture predict h1* if e(sample), correlation
+			capture drop h1_`x'_`x'
+			capture drop h1_`y'_`y'
+           }
+}
+}
